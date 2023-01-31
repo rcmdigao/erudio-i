@@ -1,15 +1,15 @@
 package br.com.person.services;
 
-
+import br.com.person.data.vo.v1.PersonVO;
 import br.com.person.exceptions.ResourceNotFoundException;
+import br.com.person.maper.DozerMapper;
 import br.com.person.model.Person;
 import br.com.person.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 @Service
@@ -18,31 +18,40 @@ public class PersonServices {
     @Autowired
     private PersonRepository repository;
 
-    public List<Person> findAll(){
+    public List<PersonVO> findAll(){
        logger.info("Listando pessoas");
-       return repository.findAll();
+       return DozerMapper.parseListObjects(repository.findAll(), PersonVO.class);
     }
 
-    public Person finById(Long id){
+    public PersonVO finById(Long id){
 
        logger.info("Procurando uma pessoa");
-       return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado um registro para esse ID"));
+       var entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado um registro para esse ID"));
+       return DozerMapper.parseObject(entity, PersonVO.class);
     }
 
-    public Person create(Person person){
+
+    // Todo Create
+    public PersonVO create(PersonVO person){
+
         logger.info("Cadastrando pessoa");
-        return repository.save(person);
+
+        var entity = DozerMapper.parseObject(person, Person.class);
+        var vo = DozerMapper.parseObject(repository.save(entity), PersonVO.class);
+        return vo;
     }
 
     // Todo Update
-    public Person update(Person person){
+    public PersonVO update(PersonVO person){
         logger.info("Atualizando pessoa");
         var entity = repository.findById(person.getId()).orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado um registro para esse ID"));
         entity.setPrimeiroNome(person.getPrimeiroNome());
         entity.setUltimoNome(person.getUltimoNome());
         entity.setEndereco(person.getEndereco());
         entity.setGenero(person.getGenero());
-        return repository.save(person);
+
+        var vo = DozerMapper.parseObject(repository.save(entity), PersonVO.class);
+        return vo;
     }
 
 
