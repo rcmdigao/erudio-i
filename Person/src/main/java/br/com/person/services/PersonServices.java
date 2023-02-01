@@ -1,8 +1,10 @@
 package br.com.person.services;
 
 import br.com.person.data.vo.v1.PersonVO;
+import br.com.person.data.vo.v2.PersonVOV2;
 import br.com.person.exceptions.ResourceNotFoundException;
 import br.com.person.maper.DozerMapper;
+import br.com.person.maper.PersonMapper;
 import br.com.person.model.Person;
 import br.com.person.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class PersonServices {
     private Logger logger = Logger.getLogger(PersonServices.class.getName()); // Log
     @Autowired
     private PersonRepository repository;
+
+    @Autowired
+    private PersonMapper mapper;
 
     public List<PersonVO> findAll(){
        logger.info("Listando pessoas");
@@ -61,5 +66,15 @@ public class PersonServices {
         repository.delete(entity);
     }
 
+
+    // Todo Create - versão 2
+    public PersonVOV2 createV2(PersonVOV2 person){
+        logger.info("Cadastrando pessoa na versão 2");
+        // Convertendo VO para Entidade
+        var entity = mapper.converterVoToEntity(person);
+        // Convertendo Entidadade para o VO
+        var vo = mapper.converterEntityToVo(repository.save(entity));
+        return vo;
+    }
 
 }
